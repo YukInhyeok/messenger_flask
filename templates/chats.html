@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>뽀로로톡 - 채팅 목록</title>
+    <link href="../static/common.css" rel="stylesheet">
+    <link href="../static/friends.css" rel="stylesheet">
+    <link href="../static/navbar.css" rel="stylesheet">
+    <link href="../static/header.css" rel="stylesheet">
+    <link href="../static/userlist.css" rel="stylesheet">
+    <link href="../static/img/pororo.png" rel="icon">
+    <style id="dark-reader-style" type="text/css">@media screen {
+        html {-webkit-transition : -webkit-filter 300ms linear;}
+    }</style></head>
+<body>
+
+<nav class="nav">
+    <ul class="nav__list">
+        <li class="nav__btn">
+            <a href="/pororo/friends">
+                <i class="fas fa-user fa-2x" aria-hidden="true"></i>
+            </a>
+        </li>
+        <li class="nav__btn">
+            <a class="active" href="/pororo/chats">
+                <i class="fas fa-comment fa-2x" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</nav>
+
+<div class="container">
+    <header class="header">
+        <h3 class="header__title">채팅</h3>
+        <div class="header__menu">
+            <span><i class="fas fa-search" aria-hidden="true"></i></span>
+            &nbsp;
+            <span><i class="fas fa-comment-dots" aria-hidden="true"></i></span>
+        </div>
+    </header>
+
+    <main class="friends">
+        <div class="user-list">
+            {% for chat in chats %}
+                <a href="/pororo/chat/{{ chat.chat_id }}">
+                    <div class="user">
+                        <div class="user__column">
+                            <div id="profile{{ chat.chat_id }}" class="user__pic"></div>
+                        </div>
+                        <div class="user__column">
+                            <p class="user__nick">{{ chat.name }}</p>
+                            <p class="user__message">{{chat.content}}</p>
+                            <p class="user__time">오후 2시</p>
+                        </div>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    </main>
+</div>
+<script src="https://kit.fontawesome.com/c8e2b99a17.js" crossorigin="anonymous"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+    $(document).ready(async function(){
+        {% for chat in chats %}
+            var chatId = {{ chat.chat_id }};
+            await new Promise((resolve, reject) => {
+                $.ajax({
+                    url: '/pororo/get_profile/' + chatId,
+                    type: 'GET',
+                    success: function(response){
+                        let profile = response.chat.img_src;
+                        $("#profile" + chatId).css({
+                            "background-image": "url('" + profile + "')",
+                            "background-size": "100% 100%",
+                            "border-radius": "20px",
+                            "width": "60px",
+                            "height": "60px"
+                        });
+                        console.log(profile);
+                        resolve();
+                    },
+                    error: function(error){
+                        console.log(error);
+                        reject();
+                    }
+                });
+            });
+        {% endfor %}
+    });
+</script>
+</body>
+</html>

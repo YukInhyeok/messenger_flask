@@ -1,0 +1,16 @@
+@font-face {
+    font-family: 'BMJUA';
+    src: url('/static/fonts/BMJUA_ttf.ttf') format('truetype');
+}
+*{
+    font-family: BMJUA;
+    box-sizing: border-box;
+}
+html{
+    font-size: 16px;
+}
+body{
+    margin: 0;
+    height: 100vh;
+    min-width: 300px;
+}

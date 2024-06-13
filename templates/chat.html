@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>뽀로로톡 - 채팅</title>
+    <link href="../static/common.css" rel="stylesheet">
+    <link href="../static/chat.css" rel="stylesheet">
+    <link href="../static/userlist.css" rel="stylesheet">
+    <link href="../static/img/pororo.png" rel="icon">
+    <style id="dark-reader-style" type="text/css">@media screen {
+        html {-webkit-transition : -webkit-filter 300ms linear;}
+    }</style></head>
+<body>
+<div class="container">
+    <main class="chat-screen">
+        {% for chat in chat %}
+        <section class="chat-screen__bar">
+            <div class="user chat-user">
+                <div class="user__column">
+                    <div id="profile" class="user__pic"></div>
+                </div>
+                <div class="user__column">
+                    <p class="user__nick">{{chat.name}}</p>
+                    <p class="user__message">
+                        <i class="fas fa-user" aria-hidden="true"></i> 2
+                    </p>
+                </div>
+            </div>
+        </section>
+        {% endfor %}
+        <ul class="chat-screen__comments">
+        </ul>
+    </main>
+    <form class="chat-form" onsubmit="return false;">
+        <div class="chat-form__plugin">
+            <i class="far fa-smile chat-form__icon" aria-hidden="true"></i>
+            <i class="fas fa-paperclip chat-form__icon" aria-hidden="true"></i>
+            <i class="far fa-calendar-check chat-form__icon" aria-hidden="true"></i>
+        </div>
+        <div class="chat-form__field">
+            <textarea class="chat-form__msg"></textarea>
+            <input class="chat-form__bt" type="submit" value="전송">
+        </div>
+    </form>
+</div>
+<script src="https://kit.fontawesome.com/c8e2b99a17.js" crossorigin="anonymous"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+    $(document).ready(function(){
+        let chatId = {{ chat_id }};  // 현재 채팅방의 ID
+
+        $(".chat-form").on('submit', function(e){
+            e.preventDefault();
+            let messageContent = $(".chat-form__msg").val();
+            $.ajax({
+                url: '/pororo/send_message',
+                data: {'chat_id': chatId, 'content': messageContent},
+                type: 'POST',
+                success: function(response){
+                    console.log(response);
+                    $(".chat-form__msg").val('');
+                    loadMessages();
+                },
+                error: function(error){
+                    console.log(error);
+                }
+            });
+        });
+
+        function loadMessages(){
+            $.ajax({
+                url: '/pororo/get_messages/' + chatId,  // 채팅방 ID에 해당하는 메시지만 요청합니다.
+                type: 'GET',
+                success: function(response){
+                    let messages = response.messages;
+                    $(".chat-screen__comments").empty();
+                    for(let i=0; i<messages.length; i++){
+                        $(".chat-screen__comments").append('<li class="comment">' + messages[i] + '</li>');
+                    }
+                },
+                error: function(error){
+                    console.log(error);
+                }
+            });
+        }
+        loadMessages();
+
+        function loadProfile(){
+            $.ajax({
+                url: '/pororo/get_profile/' + chatId,
+                type: 'GET',
+                success: function(response){
+                    let profile = response.chat.img_src;
+                    $("#profile").css({
+                        "background-image": "url('" + profile + "')",
+                        "background-size": "100% 100%",
+                        "border-radius": "20px",
+                        "width": "60px",
+                        "height": "60px"
+                    });
+                    console.log(profile)
+                },
+                error: function(error){
+                    console.log(error);
+                }
+            });
+        }
+
+        loadProfile();
+    });
+</script>
+</body>
+</html>
